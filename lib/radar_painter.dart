@@ -6,7 +6,7 @@ class RadarPainter extends CustomPainter {
     final Paint paint = Paint()
       ..color = Color(0xFF2AB82D)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
+      ..strokeWidth = 1.0;
 
     const double step = 90.0; // Increase the step value for a less dense grid
 
@@ -15,19 +15,9 @@ class RadarPainter extends CustomPainter {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
     }
 
-    // Ensure the grid ends with a vertical line on the right
-    if (size.width % step != 0) {
-      canvas.drawLine(Offset(size.width, 0), Offset(size.width, size.height), paint);
-    }
-
     // Draw horizontal lines
     for (double y = 0; y <= size.height; y += step) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-
-    // Ensure the grid ends with a horizontal line at the bottom
-    if (size.height % step != 0) {
-      canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), paint);
     }
 
     // Draw text -180° at the top left
