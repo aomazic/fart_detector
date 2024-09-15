@@ -15,7 +15,6 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         fontFamily: 'pcsenior',
         textTheme: const TextTheme(
-          headlineLarge: TextStyle(color: Color(0xFF2AB82D)),
           bodyLarge: TextStyle(color: Color(0xFF2AB82D)),
           bodyMedium: TextStyle(color: Color(0xFF2AB82D)),
         ),
