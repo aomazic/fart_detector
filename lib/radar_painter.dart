@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 
 class RadarPainter extends CustomPainter {
+  final double linePosition;
+
+  RadarPainter(this.linePosition);
+
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
-      ..color = Color(0xFF2AB82D)
+      ..color = const Color(0xFF2AB82D)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
 
@@ -20,6 +24,14 @@ class RadarPainter extends CustomPainter {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
     }
 
+    // Draw radar sweeping line
+    final Paint sweepPaint = Paint()
+      ..color = const Color(0xFF2AB82D)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 5.0;
+
+    canvas.drawLine(Offset(linePosition, 0), Offset(linePosition, size.height), sweepPaint);
+
     // Draw text -180° at the top left
     final textPainterLeft = TextPainter(
       text: const TextSpan(
@@ -27,7 +39,7 @@ class RadarPainter extends CustomPainter {
         style: TextStyle(
           color: Color(0xFF2AB82D),
           fontSize: 14,
-          fontFamily: 'pcsenior'
+          fontFamily: 'pcsenior',
         ),
       ),
       textDirection: TextDirection.ltr,
@@ -42,7 +54,7 @@ class RadarPainter extends CustomPainter {
         style: TextStyle(
           color: Color(0xFF2AB82D),
           fontSize: 14,
-          fontFamily: 'pcsenior'
+          fontFamily: 'pcsenior',
         ),
       ),
       textDirection: TextDirection.ltr,
@@ -53,6 +65,6 @@ class RadarPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
+    return true;
   }
 }

@@ -8,7 +8,11 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+  // Animation controller for radar sweeping line
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
   // Dynamic values for info panel
   String threatLevel = 'Moderate';
   String detectionStatus = 'Active';
@@ -17,6 +21,27 @@ class _HomePageState extends State<HomePage> {
 
   // Console messages
   List<String> consoleMessages = ['Initializing...'];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat();
+
+    _animation = Tween<double>(begin: 0, end: 1).animate(_controller)
+      ..addListener(() {
+        setState(() {});
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   // Simulating a new fart detection
   void detectFart() {
@@ -72,7 +97,7 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       child: CustomPaint(
-        painter: RadarPainter(),
+        painter: RadarPainter(_animation.value * MediaQuery.of(context).size.width),
       ),
     );
   }
