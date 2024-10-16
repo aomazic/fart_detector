@@ -1,5 +1,10 @@
-import 'package:fart_detector/radar_painter.dart';
+import 'dart:async';
+import 'dart:math'; // Import this to use Random
+
 import 'package:flutter/material.dart';
+
+import '../models/FartData.dart';
+import '../painters/radar_painter.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,6 +26,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   // Console messages
   List<String> consoleMessages = ['Initializing...'];
+
+  // List to track fart positions, heights, and sizes
+  List<FartData> fartDataList = [];
+
+  // Random generator
+  final Random random = Random();
 
   @override
   void initState() {
@@ -46,12 +57,55 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   // Simulating a new fart detection
   void detectFart() {
     setState(() {
+      // Store the current line position, random height, and size
+      final double lineXPosition =
+          _animation.value * MediaQuery.of(context).size.width;
+      final double randomHeight =
+          random.nextDouble() * MediaQuery.of(context).size.height;
+      final double dotSize = calculateDotSize(threatLevel);
+
+      final fartData = FartData(
+        xPosition: lineXPosition,
+        yPosition: randomHeight,
+        size: dotSize,
+        opacity: 1.0,
+      );
+      fartDataList.add(fartData);
+      fadeOutFart(fartData);
+
+      // Update the console and dynamic information
       consoleMessages.add('New Fart Detected!');
       threatLevel = 'High';
       detectionStatus = 'Detected at 3 o\'clock';
       gasComposition = 'Methane 95%';
       lastKnownFart = '2m West';
     });
+  }
+
+  void fadeOutFart(FartData fartData) {
+    Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      setState(() {
+        fartData.opacity -= 0.05;
+        if (fartData.opacity <= 0.0) {
+          fartDataList.remove(fartData);
+          timer.cancel();
+        }
+      });
+    });
+  }
+
+  // Calculate dot size based on threat level
+  double calculateDotSize(String threatLevel) {
+    switch (threatLevel) {
+      case 'High':
+        return 10 + random.nextDouble() * 5; // High threat: larger dot size
+      case 'Moderate':
+        return 6 + random.nextDouble() * 3; // Moderate threat: medium size
+      case 'Low':
+        return 3 + random.nextDouble() * 2; // Low threat: smaller dot size
+      default:
+        return 5; // Default size if threat level is unknown
+    }
   }
 
   @override
@@ -97,7 +151,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         ),
       ),
       child: CustomPaint(
-        painter: RadarPainter(_animation.value * MediaQuery.of(context).size.width),
+        painter: RadarPainter(
+          linePosition: _animation.value * MediaQuery.of(context).size.width,
+          fartDataList:
+              fartDataList, // Pass fart positions, heights, and sizes to the painter
+        ),
       ),
     );
   }

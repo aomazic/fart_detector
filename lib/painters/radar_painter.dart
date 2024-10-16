@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../models/FartData.dart';
+
 class RadarPainter extends CustomPainter {
   final double linePosition;
+  final List<FartData> fartDataList;
 
-  RadarPainter(this.linePosition);
+  RadarPainter({required this.linePosition, required this.fartDataList});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -31,6 +34,19 @@ class RadarPainter extends CustomPainter {
       ..strokeWidth = 5.0;
 
     canvas.drawLine(Offset(linePosition, 0), Offset(linePosition, size.height), sweepPaint);
+
+    // Draw fart positions as dots with opacity
+    for (FartData fartData in fartDataList) {
+      final Paint fartPaint = Paint()
+        ..color = Colors.red.withOpacity(fartData.opacity) // Apply opacity
+        ..style = PaintingStyle.fill;
+
+      canvas.drawCircle(
+        Offset(fartData.xPosition, fartData.yPosition),
+        fartData.size, // Dot size
+        fartPaint,
+      );
+    }
 
     // Draw text -180° at the top left
     final textPainterLeft = TextPainter(
