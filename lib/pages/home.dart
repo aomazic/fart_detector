@@ -25,7 +25,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   String lastKnownFart = '1m South';
 
   // Console messages
-  List<String> consoleMessages = ['Initializing...'];
+  String consoleMessage = 'System Active...';
 
   // List to track fart positions, heights, and sizes
   List<FartData> fartDataList = [];
@@ -74,7 +74,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       fadeOutFart(fartData);
 
       // Update the console and dynamic information
-      consoleMessages.add('New Fart Detected!');
+      consoleMessage = 'New Fart Detected!';
       threatLevel = 'High';
       detectionStatus = 'Detected at 3 o\'clock';
       gasComposition = 'Methane 95%';
@@ -113,11 +113,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     return Scaffold(
       appBar: buildAppBar(),
       body: buildBody(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: detectFart, // Simulate a new detection on button press
-        backgroundColor: Colors.green,
-        child: const Icon(Icons.refresh),
-      ),
     );
   }
 
@@ -220,19 +215,16 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   Widget buildConsole() {
     return Container(
+      width: double.infinity,
       color: Colors.black,
       padding: const EdgeInsets.all(8.0),
-      child: ListView.builder(
-        itemCount: consoleMessages.length,
-        itemBuilder: (context, index) {
-          return Text(
-            consoleMessages[index],
-            style: const TextStyle(
-              color: Colors.green,
-              fontSize: 12,
-            ),
-          );
-        },
+      child: Text(
+        consoleMessage,
+        style: const TextStyle(
+          color: Colors.green,
+          fontSize: 14,
+        ),
+        textAlign: TextAlign.left,
       ),
     );
   }
