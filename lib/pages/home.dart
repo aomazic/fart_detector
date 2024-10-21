@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'dart:math'; // Import this to use Random
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 
 import '../models/FartData.dart';
 import '../painters/radar_painter.dart';
+import '../utilis/audio_processing.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -33,10 +34,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   // Random generator
   final Random random = Random();
 
+  // Audio detector instance
+  final AudioDetector _audioDetector = AudioDetector();
+
   @override
   void initState() {
     super.initState();
 
+    // Initialize the radar controller
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -46,11 +51,26 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       ..addListener(() {
         setState(() {});
       });
+
+    _initializeAudio();
+  }
+
+  Future<void> _initializeAudio() async {
+    try {
+      await _audioDetector.init();
+      _audioDetector.startListening(() {
+        detectFart();
+      });
+    } catch (e) {
+      print("Error initializing audio: $e");
+    }
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _audioDetector.stopListening(); // Stop audio detection
+    _audioDetector.dispose(); // Dispose of the audio resources
     super.dispose();
   }
 
