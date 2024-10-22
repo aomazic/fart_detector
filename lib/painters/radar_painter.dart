@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../models/FartData.dart';
+import '../models/fart_data.dart';
 
 class RadarPainter extends CustomPainter {
   final double linePosition;

@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import '../models/FartData.dart';
+import '../models/fart_data.dart';
 import '../painters/radar_painter.dart';
 import '../utilis/audio_processing.dart';
 
