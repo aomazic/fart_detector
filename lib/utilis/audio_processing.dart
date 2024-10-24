@@ -9,18 +9,17 @@ import '../models/fart_ai_model.dart';
 class AudioDetector {
   final FlutterSoundRecorder _recorder = FlutterSoundRecorder();
   final FartModel _fartModel = FartModel();
-  final StreamController<Uint8List> _audioStreamController =
-      StreamController<Uint8List>();
   final fartCategoryIndex = 55;
   static const int targetSampleRate = 16000;
   static const int frameSize = 15600;
-  static const int overlapSize = 7800;
+  bool _mRecorderIsInited = false;
 
   Future<void> init() async {
     var status = await Permission.microphone.request();
     if (status.isGranted) {
       await _recorder.openRecorder();
       print("Recorder opened successfully");
+      _mRecorderIsInited = true;
       await _fartModel.loadModel();
     } else {
       print("Microphone permission not granted");
@@ -28,20 +27,27 @@ class AudioDetector {
   }
 
   Future<void> startListening(Function onFartDetected) async {
-    List<int> audioBuffer = []; // store raw PCM samples
+    if (!_mRecorderIsInited) {
+      print("Recorder not initialized");
+      return;
+    }
+    List<int> audioBuffer = [];
+    var recordingDataController = StreamController<List<Int16List>>();
 
-    _audioStreamController.stream.listen((audioData) async {
-      // Convert Uint8List (bytes) to a list of PCM samples (signed 16-bit integers)
-      List<int> pcmSamples = audioData.buffer.asInt16List();
-      audioBuffer.addAll(pcmSamples);
+    await _recorder.startRecorder(
+      toStreamInt16: recordingDataController.sink,
+      sampleRate: targetSampleRate,
+      codec: Codec.pcm16,
+      numChannels: 1,
+    );
 
-      // Process the audio when we have at least 15600 samples
+    recordingDataController.stream.listen((audioData) async {
+      audioBuffer.addAll(audioData[0]);
       if (audioBuffer.length >= frameSize) {
         List<int> frameSamples = audioBuffer.sublist(0, frameSize);
-        audioBuffer.removeRange(0, frameSize - overlapSize);
+        audioBuffer.removeRange(0, frameSize);
 
-        List<double> input = preprocessAudio(frameSamples);
-
+        List<double> input = normalizeToFloat(frameSamples);
         List<double> output = _fartModel.runModel(input);
 
         if (output[fartCategoryIndex] > 0.5) {
@@ -49,19 +55,11 @@ class AudioDetector {
         }
       }
     });
-
-    await _recorder.startRecorder(
-      toStream: _audioStreamController.sink,
-      codec: Codec.pcm16,
-      sampleRate: targetSampleRate,
-    );
-
-    print("Recorder started");
   }
 
-  List<double> preprocessAudio(List<int> audioData) {
-    // Convert PCM 16-bit signed integer samples to float32 normalized values in range [-1.0, +1.0]
-    return audioData.map((sample) => sample.toDouble() / 32768.0).toList();
+  List<double> normalizeToFloat(List<int> audioData) {
+    // Normalize Int16List to float32 -1 to 1
+    return audioData.map((e) => e / 32768.0).toList();
   }
 
   Future<void> stopListening() async {
@@ -70,6 +68,5 @@ class AudioDetector {
 
   void dispose() {
     _recorder.closeRecorder();
-    _audioStreamController.close();
   }
 }

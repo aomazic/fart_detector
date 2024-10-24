@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:tflite_flutter/tflite_flutter.dart';
 
@@ -12,24 +11,8 @@ class FartModel {
   Future<void> loadModel() async {
     try {
       _interpreter = await Interpreter.fromAsset('assets/models/yamnet.tflite');
-      await _loadCategoryMap();
     } catch (e) {
       log('Failed to load model: $e');
-    }
-  }
-
-  Future<void> _loadCategoryMap() async {
-    try {
-      final file = File('assets/utils/mappings.csv');
-      final lines = await file.readAsLines();
-      for (var line in lines.skip(1)) {
-        final parts = line.split(',');
-        final index = int.parse(parts[0]);
-        final displayName = parts[2];
-        mappings.soundCategories[index] = displayName;
-      }
-    } catch (e) {
-      log('Failed to load category map: $e');
     }
   }
 
